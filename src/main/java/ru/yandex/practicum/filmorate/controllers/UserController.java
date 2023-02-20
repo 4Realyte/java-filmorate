@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,36 +41,22 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User user) throws JsonProcessingException {
-        User validatedUser;
-        try {
-            validatedUser = validate(user);
-            if (validatedUser.getName() == null || validatedUser.getName().isBlank()) {
-                validatedUser.setName(validatedUser.getLogin());
-            }
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
+    public User create(@Valid @RequestBody User user) throws JsonProcessingException {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
-        validatedUser.setId(idCounter.incrementAndGet());
-        users.put(validatedUser.getId(), validatedUser);
-        log.info("Добавлен пользователь : {}", mapper.writeValueAsString(validatedUser));
-        return validatedUser;
+        user.setId(idCounter.incrementAndGet());
+        users.put(user.getId(), user);
+        log.info("Добавлен пользователь : {}", mapper.writeValueAsString(user));
+        return user;
     }
 
     @PutMapping
-    public User update(@RequestBody User user) throws JsonProcessingException {
-        User validatedUser;
-        try {
-            validatedUser = validate(user);
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
-        }
-        if (users.containsKey(validatedUser.getId())) {
-            users.put(validatedUser.getId(), validatedUser);
-            log.info("Обновлен пользователь : {}", mapper.writeValueAsString(validatedUser));
-            return validatedUser;
+    public User update(@Valid @RequestBody User user) throws JsonProcessingException {
+        if (users.containsKey(user.getId())) {
+            users.put(user.getId(), user);
+            log.info("Обновлен пользователь : {}", mapper.writeValueAsString(user));
+            return user;
         } else {
             throw new UserNotFoundException("Пользователь не найден");
         }

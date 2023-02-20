@@ -8,9 +8,9 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,33 +42,22 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film create(@RequestBody Film film) throws JsonProcessingException {
-        Film validatedFilm;
-        try {
-            validatedFilm = validate(film);
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
+    public Film create(@Valid @RequestBody Film film) throws JsonProcessingException {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("дата релиза — не раньше 28.12.1895");
         }
-        validatedFilm.setId(idCounter.incrementAndGet());
-        films.put(validatedFilm.getId(), validatedFilm);
-        log.info("Создан фильм : {}", mapper.writeValueAsString(validatedFilm));
-        return validatedFilm;
+        film.setId(idCounter.incrementAndGet());
+        films.put(film.getId(), film);
+        log.info("Создан фильм : {}", mapper.writeValueAsString(film));
+        return film;
     }
 
     @PutMapping
-    public Film update(@RequestBody Film film) throws JsonProcessingException {
-        Film validatedFilm;
-        try {
-            validatedFilm = validate(film);
-        } catch (ValidationException ex) {
-            log.error(ex.getMessage());
-            throw new ValidationException(ex.getMessage());
-        }
-        if(films.containsKey(validatedFilm.getId())) {
-            films.put(validatedFilm.getId(), validatedFilm);
-            log.info("Обновлен фильм : {}", mapper.writeValueAsString(validatedFilm));
-            return validatedFilm;
+    public Film update(@Valid @RequestBody Film film) throws JsonProcessingException {
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
+            log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
+            return film;
         } else {
             throw new FilmNotFoundException("фильма не существует");
         }
