@@ -31,11 +31,6 @@ class FilmorateApplicationTests {
         filmController = new FilmController();
         userController =  new UserController();
     }
-
-    @Test
-    void contextLoads() {
-    }
-
     @Test
     public void createFilm_withoutName() throws IOException, InterruptedException {
         Film film = Film.builder()
@@ -122,7 +117,7 @@ class FilmorateApplicationTests {
                 .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         ConstraintViolation<User> violation = violations.iterator().next();
-        assertEquals("Email shouldn't be empty", violation.getMessage());
+        assertEquals("Электронная почта не может быть пустой", violation.getMessage());
     }
     @Test
     public void createUser_withInvalidEmail() throws IOException, InterruptedException {
@@ -135,7 +130,7 @@ class FilmorateApplicationTests {
                 .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         ConstraintViolation<User> violation = violations.iterator().next();
-        assertEquals("Email should be valid", violation.getMessage());
+        assertEquals("Эмейл должен быть корректным", violation.getMessage());
     }
     @Test
     public void createUser_emptyLogin() throws IOException, InterruptedException {
@@ -148,7 +143,7 @@ class FilmorateApplicationTests {
                 .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         ConstraintViolation<User> violation = violations.iterator().next();
-        assertEquals("login shouldn't be empty", violation.getMessage());
+        assertEquals("Логин не может быть пустым", violation.getMessage());
     }
     @Test
     public void createUser_shouldUseLoginWhenNameIsEmpty() throws IOException, InterruptedException {

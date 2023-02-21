@@ -27,19 +27,6 @@ public class UserController {
     public Collection<User> getUsers() {
         return users.values();
     }
-
-    private User validate(User user) {
-        if (user.getEmail().isBlank()
-                || !user.getEmail().matches("\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*\\.\\w{2,4}")) {
-            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
-        } else if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            throw new ValidationException("логин не может быть пустым и содержать пробелы");
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("дата рождения не может быть в будущем");
-        }
-        return user;
-    }
-
     @PostMapping
     public User create(@Valid @RequestBody User user) throws JsonProcessingException {
         if (user.getName() == null || user.getName().isBlank()) {

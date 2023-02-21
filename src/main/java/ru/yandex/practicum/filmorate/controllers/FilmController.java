@@ -27,22 +27,8 @@ public class FilmController {
     public Collection<Film> getFilms() {
         return films.values();
     }
-
-    private Film validate(Film film) throws ValidationException {
-        if (film.getName() == null || film.getName().isBlank()) {
-            throw new ValidationException("Название фильма не может быть пустым.");
-        } else if (film.getDescription().length() > 200) {
-            throw new ValidationException("максимальная длина описания — 200 символов");
-        } else if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("дата релиза — не раньше 28.12.1895");
-        } else if (film.getDuration() < 0) {
-            throw new ValidationException("продолжительность фильма должна быть положительной!");
-        }
-        return film;
-    }
-
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) throws JsonProcessingException {
+    public Film create(@Valid @RequestBody Film film) throws JsonProcessingException, ValidationException {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("дата релиза — не раньше 28.12.1895");
         }
@@ -53,7 +39,10 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) throws JsonProcessingException {
+    public Film update(@Valid @RequestBody Film film) throws JsonProcessingException, ValidationException {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("дата релиза — не раньше 28.12.1895");
+        }
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
