@@ -29,9 +29,6 @@ public class FilmController {
     }
     @PostMapping
     public Film create(@Valid @RequestBody Film film) throws JsonProcessingException, ValidationException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("дата релиза — не раньше 28.12.1895");
-        }
         film.setId(idCounter.incrementAndGet());
         films.put(film.getId(), film);
         log.info("Создан фильм : {}", mapper.writeValueAsString(film));
@@ -40,9 +37,6 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws JsonProcessingException, ValidationException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("дата релиза — не раньше 28.12.1895");
-        }
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
