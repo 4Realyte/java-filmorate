@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.controllers.UserController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -24,7 +23,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -116,10 +114,15 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(1894, 11, 12))
                 .duration(100)
                 .build();
-        ValidationException ex = assertThrows(ValidationException.class, () -> {
-            filmController.create(film);
-        });
-        assertEquals("дата релиза — не раньше 28.12.1895", ex.getMessage());
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        ConstraintViolation<Film> violation = violations.iterator().next();
+        assertEquals("дата релиза — не раньше 28.12.1895", violation.getMessage());
+
+        String jsonFilm = objectMapper.writeValueAsString(film);
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(jsonFilm))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

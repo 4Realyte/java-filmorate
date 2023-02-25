@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.validators.ReleaseDate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
@@ -19,7 +20,7 @@ public class Film {
     @NotBlank
     @Size(message = "максимальная длина описания — 200 символов", max = 200)
     private String description;
-    @PastOrPresent
+    @ReleaseDate(message = "дата релиза — не раньше 28.12.1895")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной или равной нулю")
