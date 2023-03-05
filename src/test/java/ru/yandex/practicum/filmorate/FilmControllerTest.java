@@ -119,7 +119,6 @@ public class FilmControllerTest extends ControllerTest {
     @Test
     @SneakyThrows
     public void HttpCreateFilm_withNegativeOrZeroDuration() {
-        FilmController controller = new FilmController();
         Film film = Film.builder().id(1).name("titan").description("descript")
                 .releaseDate(LocalDate.of(1987, 11, 12))
                 .duration(-15)
