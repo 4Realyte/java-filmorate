@@ -41,7 +41,12 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
             return film;
         } else {
-            throw new FilmNotFoundException("фильма не существует");
+            throw new FilmNotFoundException(String.format("Фильм с id: %s не обнаружен", film.getId()));
         }
+    }
+
+    public Film getFilmById(Integer id) {
+        if (!films.containsKey(id)) throw new FilmNotFoundException(String.format("Фильм с id: %s не обнаружен", id));
+        return films.get(id);
     }
 }

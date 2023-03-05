@@ -19,7 +19,7 @@ public class User {
     @Builder.Default
     private Set<Integer> friends = new LinkedHashSet<>();
     private int id;
-    @NotBlank(message = "Электронная почта не может быть пустой") @Email(message = "Эмейл должен быть корректным")
+    @NotBlank(message = "Электронная почта не может быть пустой") @Email(message = "Email должен быть корректным")
     private String email;
     @NotBlank(message = "Логин не может быть пустым")
     private String login;

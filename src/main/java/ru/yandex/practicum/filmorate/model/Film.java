@@ -3,17 +3,22 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 import ru.yandex.practicum.filmorate.validators.ReleaseDate;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @Builder
+@Jacksonized
 public class Film {
+    @Builder.Default
+    private Set<Integer> usersLiked = new LinkedHashSet<>();
     private int id;
     @NotBlank(message = "Имя не может быть пустым")
     private String name;
