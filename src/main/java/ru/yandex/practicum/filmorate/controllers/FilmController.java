@@ -1,15 +1,18 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/films")
+@Validated
 public class FilmController {
     private final FilmStorage filmStorage;
     private final FilmService filmService;
@@ -24,9 +27,11 @@ public class FilmController {
         return filmStorage.getFilms();
     }
 
-    @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable Integer id) {
-       return filmStorage.getFilmById(id);
+    @GetMapping(value = "/{id}")
+    public Film getFilmById(@PathVariable
+                            @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
+        return filmStorage.getFilmById(id);
+
     }
 
     @PostMapping
@@ -40,17 +45,25 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
+    public void addLike(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                        Integer filmId,
+                        @PathVariable
+                        Integer userId) {
         filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
+    public void deleteLike(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                           Integer filmId,
+                           @PathVariable
+                           Integer userId) {
         filmService.deleteLike(filmId, userId);
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
+    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10")
+                                            @PositiveOrZero(message = "Параметр count не может быть отрицательным")
+                                            Integer count) {
         return filmService.getPopularFilms(count);
     }
 }

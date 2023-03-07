@@ -1,15 +1,18 @@
 package ru.yandex.practicum.filmorate.controllers;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
+@Validated
 public class UserController {
     private UserStorage userStorage;
     private UserService userService;
@@ -24,8 +27,9 @@ public class UserController {
         return userStorage.getUsers();
     }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Integer id) {
+    @GetMapping(value = "/{id}")
+    public User getUserById(@PathVariable
+                            @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
         return userStorage.getUserById(id);
     }
 
@@ -40,23 +44,35 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+    public void addFriend(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                          Integer userId,
+                          @PathVariable
+                          Integer friendId) {
         userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+    public void deleteFriend(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                             Integer userId,
+                             @PathVariable
+                             Integer friendId) {
         userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable("id") Integer userId) {
+    public Collection<User> getFriends(@PathVariable("id")
+                                       @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                                       Integer userId) {
         return userService.getFriends(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> findCommonFriends(@PathVariable("id") Integer userId,
-                                              @PathVariable("otherId") Integer friendId) {
+    public Collection<User> findCommonFriends(@PathVariable("id")
+                                              @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                                              Integer userId,
+                                              @PathVariable("otherId")
+                                              @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                                              Integer friendId) {
         return userService.findCommonFriends(userId, friendId);
     }
 }

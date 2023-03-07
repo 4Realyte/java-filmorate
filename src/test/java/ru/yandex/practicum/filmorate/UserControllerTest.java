@@ -55,7 +55,7 @@ public class UserControllerTest extends ControllerTest {
                 .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         ConstraintViolation<User> violation = violations.iterator().next();
-        assertEquals("Эмейл должен быть корректным", violation.getMessage());
+        assertEquals("Email должен быть корректным", violation.getMessage());
     }
 
     @Test

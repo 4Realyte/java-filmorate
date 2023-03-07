@@ -7,8 +7,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +24,7 @@ public class UserService {
         User friend = userStorage.getUserById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
-        log.info("Пользователь {} успешно добавил в друзья {}", user.getLogin(), friend.getLogin());
+        log.info("Пользователь - {} успешно добавил в друзья пользователя - {}", user.getLogin(), friend.getLogin());
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
@@ -34,7 +32,7 @@ public class UserService {
         User friend = userStorage.getUserById(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
-        log.info("Пользователь {} успешно удалил из друзей {}", user.getLogin(), friend.getLogin());
+        log.info("Пользователь - {} успешно удалил из друзей пользователя - {}", user.getLogin(), friend.getLogin());
     }
 
     public Collection<User> getFriends(Integer userId) {

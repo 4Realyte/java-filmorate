@@ -7,11 +7,22 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
 @RestControllerAdvice(basePackages = "ru.yandex.practicum.filmorate.controllers")
 @Slf4j
 public class ErrorHandler {
+
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleParamAndPathEx(final ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().iterator().next().getMessage();
+        log.warn("Ошибка валидации запроса: {}", message);
+        return Map.of("Ошибка валидации запроса", message);
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationEx(final MethodArgumentNotValidException ex) {

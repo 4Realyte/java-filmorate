@@ -37,7 +37,8 @@ public class FilmService {
 
     public Collection<Film> getPopularFilms(Integer count) {
         return filmStorage.getFilms().stream()
-                .sorted(Comparator.comparing(Film::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(Comparator.comparing(film -> film.getUsersLiked().size(),
+                        Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(count)
                 .collect(Collectors.toSet());
     }
