@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;

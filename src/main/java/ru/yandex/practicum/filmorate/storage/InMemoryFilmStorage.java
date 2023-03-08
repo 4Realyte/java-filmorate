@@ -19,6 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     private static final AtomicInteger idCounter = new AtomicInteger(0);
 
+
     @Override
     public Collection<Film> getFilms() {
         return films.values();

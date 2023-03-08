@@ -4,7 +4,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
 import javax.validation.constraints.PositiveOrZero;
@@ -14,34 +13,32 @@ import java.util.Collection;
 @RequestMapping("/films")
 @Validated
 public class FilmController {
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
-        this.filmStorage = filmStorage;
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> getFilms() {
-        return filmStorage.getFilms();
+        return filmService.getFilms();
     }
 
     @GetMapping(value = "/{id}")
     public Film getFilmById(@PathVariable
                             @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
-        return filmStorage.getFilmById(id);
+        return filmService.getFilmById(id);
 
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        return filmStorage.create(film);
+        return filmService.createFilm(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        return filmStorage.update(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")

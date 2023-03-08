@@ -4,7 +4,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
 import javax.validation.constraints.PositiveOrZero;
@@ -14,33 +13,31 @@ import java.util.Collection;
 @RequestMapping("/users")
 @Validated
 public class UserController {
-    private UserStorage userStorage;
     private UserService userService;
 
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping
     public Collection<User> getUsers() {
-        return userStorage.getUsers();
+        return userService.getUsers();
     }
 
     @GetMapping(value = "/{id}")
     public User getUserById(@PathVariable
                             @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
-        return userStorage.getUserById(id);
+        return userService.getUserById(id);
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        return userStorage.create(user);
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        return userStorage.update(user);
+        return userService.updateUser(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

@@ -1,9 +1,8 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.ConstraintViolation;
