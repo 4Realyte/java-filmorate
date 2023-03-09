@@ -1,48 +1,66 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
+@Validated
 public class FilmController {
-    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-    private static final AtomicInteger idCounter = new AtomicInteger(0);
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final FilmService filmService;
+
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> getFilms() {
-        return films.values();
+        return filmService.getFilms();
     }
+
+    @GetMapping(value = "/{id}")
+    public Film getFilmById(@PathVariable
+                            @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
+        return filmService.getFilmById(id);
+
+    }
+
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) throws JsonProcessingException, ValidationException {
-        film.setId(idCounter.incrementAndGet());
-        films.put(film.getId(), film);
-        log.info("Создан фильм : {}", mapper.writeValueAsString(film));
-        return film;
+    public Film create(@Valid @RequestBody Film film) {
+        return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) throws JsonProcessingException, ValidationException {
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
-            return film;
-        } else {
-            throw new FilmNotFoundException("фильма не существует");
-        }
+    public Film update(@Valid @RequestBody Film film) {
+        return filmService.updateFilm(film);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                        Integer filmId,
+                        @PathVariable
+                        Integer userId) {
+        filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
+                           Integer filmId,
+                           @PathVariable
+                           Integer userId) {
+        filmService.deleteLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10")
+                                            @PositiveOrZero(message = "Параметр count не может быть отрицательным")
+                                            Integer count) {
+        return filmService.getPopularFilms(count);
     }
 }
