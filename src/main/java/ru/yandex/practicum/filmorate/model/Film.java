@@ -10,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -20,6 +21,8 @@ public class Film {
     @Builder.Default
     private Set<Integer> usersLiked = new LinkedHashSet<>();
     private int id;
+    @Builder.Default
+    private EnumSet<FilmGenre> genres = EnumSet.noneOf(FilmGenre.class);
     @NotBlank(message = "Имя не может быть пустым")
     private String name;
     @NotBlank
@@ -30,4 +33,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной или равной нулю")
     private long duration;
+    private MPA mpaRating;
 }

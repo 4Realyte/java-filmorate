@@ -9,15 +9,15 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Builder
 @Jacksonized
 public class User {
     @Builder.Default
-    private Set<Integer> friends = new LinkedHashSet<>();
+    private Map<Integer,FriendStatus> friends = new HashMap<>();
     private int id;
     @NotBlank(message = "Электронная почта не может быть пустой") @Email(message = "Email должен быть корректным")
     private String email;
