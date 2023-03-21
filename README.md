@@ -12,23 +12,18 @@ Action, comedy, thriller и т. п.
 * Получение топ 10 самых популярных фильмов
 ```roomsql
 SELECT * FROM film
-WHERE film_id IN (SELECT film_id
-FROM (SELECT film_id, COUNT(film_id) as likes
-FROM film_like
+WHERE film_id IN (SELECT film_id FROM film_like
 GROUP BY film_id
-ORDER BY likes DESC
-LIMIT 10));
+ORDER BY COUNT(film_id) DESC
+LIMIT 10);
 ```
 * Получение списка общих друзей с другим пользователем.
 ```roomsql
-SELECT friend_id as common
-FROM (SELECT friend_id FROM user
-WHERE user_id = 1 AND status = 'true'
-UNION ALL
-SELECT friend_id FROM user
-WHERE user_id = 2 AND status = 'true')
-GROUP BY common
-HAVING COUNT(common) >= 2;
+SELECT * FROM user WHERE user_id IN (
+SELECT friend_id FROM friends
+WHERE user_id = 1 AND status = 'true' AND friend_id IN (
+SELECT friend_id FROM friends
+WHERE user_id = 2 AND status = 'true'));
 ```
 * Получение всех фильмов.
 ```roomsql
