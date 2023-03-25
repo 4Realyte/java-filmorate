@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.database;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
 import ru.yandex.practicum.filmorate.dao.FilmLikeDao;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
@@ -23,7 +25,6 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaDao mpaDao;
     private final FilmGenreDao filmGenreDao;
     private final FilmLikeDao filmLikeDao;
-
 
     @Override
     public Collection<Film> getFilms() {
@@ -48,16 +49,32 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        return null;
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("film")
+                .usingGeneratedKeyColumns("id");
+        int id = jdbcInsert.executeAndReturnKey(Map.of("name", film.getName(),
+                "description", film.getDescription(),
+                "release_date", film.getReleaseDate(),
+                "duration", film.getDuration(),
+                "rating_id", mpaDao.getMpaId(film.getMpaRating()))).intValue();
+        film.setId(id);
+        return film;
     }
 
     @Override
     public Film update(Film film) {
-        return null;
+        String sql = "UPDATE film SET name=?, description=?, release_date=?,duration=?, rating_id=? WHERE id=?";
+        jdbcTemplate.update(sql, film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpaRating(),
+                mpaDao.getMpaId(film.getMpaRating()));
+        return film;
     }
 
     @Override
     public Film getFilmById(Integer id) {
-        return null;
+        String sql = "SELECT * FROM film WHERE id=?";
+        return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeFilm(rs)), id);
     }
 }
