@@ -11,7 +11,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -19,7 +19,7 @@ import java.util.Set;
 @Jacksonized
 public class Film {
     @Builder.Default
-    private Set<Integer> usersLiked = new LinkedHashSet<>();
+    private Set<Integer> usersLiked = new HashSet<>();
     private int id;
     @Builder.Default
     private EnumSet<FilmGenre> genres = EnumSet.noneOf(FilmGenre.class);

@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.memory.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.memory.InMemoryUserStorage;
 
 abstract class ServiceTest {
     protected FilmService filmService;
