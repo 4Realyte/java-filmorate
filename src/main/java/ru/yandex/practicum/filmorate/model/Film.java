@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,7 +21,7 @@ public class Film {
     private Set<Integer> usersLiked = new HashSet<>();
     private int id;
     @Builder.Default
-    private EnumSet<FilmGenre> genres = EnumSet.noneOf(FilmGenre.class);
+    private Set<FilmGenre> genres = new HashSet<>();
     @NotBlank(message = "Имя не может быть пустым")
     private String name;
     @NotBlank

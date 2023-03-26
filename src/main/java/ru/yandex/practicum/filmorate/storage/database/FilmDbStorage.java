@@ -2,12 +2,14 @@ package ru.yandex.practicum.filmorate.storage.database;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
 import ru.yandex.practicum.filmorate.dao.FilmLikeDao;
 import ru.yandex.practicum.filmorate.dao.MpaDao;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
@@ -41,7 +43,7 @@ public class FilmDbStorage implements FilmStorage {
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .mpaRating(mpaDao.getMpaById(rs.getInt("rating_id")))
-                .genres(filmGenreDao.getAllGenresById(rs.getInt("id")))
+                .genres(filmGenreDao.getAllGenresByFilmId(rs.getInt("id")))
                 .usersLiked(filmLikeDao.findUsersIdLiked(rs.getInt("id")))
                 .build();
         return film;
@@ -57,24 +59,31 @@ public class FilmDbStorage implements FilmStorage {
                 "duration", film.getDuration(),
                 "rating_id", mpaDao.getMpaId(film.getMpaRating()))).intValue();
         film.setId(id);
+        filmGenreDao.create(film);
         return film;
     }
 
     @Override
     public Film update(Film film) {
+        getFilmById(film.getId());
         String sql = "UPDATE film SET name=?, description=?, release_date=?,duration=?, rating_id=? WHERE id=?";
         jdbcTemplate.update(sql, film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getMpaRating(),
-                mpaDao.getMpaId(film.getMpaRating()));
+                mpaDao.getMpaId(film.getMpaRating()),
+                film.getId());
         return film;
     }
 
     @Override
     public Film getFilmById(Integer id) {
         String sql = "SELECT * FROM film WHERE id=?";
-        return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeFilm(rs)), id);
+        try {
+            return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeFilm(rs)), id);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new FilmNotFoundException(String.format("Фильм с id: %s не обнаружен", id));
+        }
     }
 }

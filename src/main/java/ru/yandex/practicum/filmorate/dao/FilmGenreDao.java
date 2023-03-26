@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 
-import java.util.EnumSet;
+import java.util.Set;
 
 public interface FilmGenreDao {
-    EnumSet<FilmGenre> getAllGenresById(int id);
+    void create(Film film);
+    Set<FilmGenre> getAllGenresByFilmId(int id);
 }

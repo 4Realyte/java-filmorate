@@ -4,26 +4,38 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
+import ru.yandex.practicum.filmorate.dao.GenreDao;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Component
 public class FilmGenreDaoImpl implements FilmGenreDao {
     private final JdbcTemplate jdbcTemplate;
+    private final GenreDao genreDao;
 
-    @Override
-    public EnumSet<FilmGenre> getAllGenresById(int id) {
-        String sql = "SELECT name FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?)";
-        List<FilmGenre> filmGenres = jdbcTemplate.query(sql, ((rs, rowNum) -> makeFilmGenre(rs)), id);
-        return EnumSet.copyOf(filmGenres);
+    public void create(Film film) {
+        if (!film.getGenres().isEmpty()) {
+            String sql = "INSERT INTO film_genre(film_id,genre_id) VALUES(?,?) ON CONFLICT DO NOTHING";
+            for (FilmGenre genre : film.getGenres()) {
+                jdbcTemplate.update(sql, film.getId(), genre.getId());
+            }
+        }
     }
 
-    private FilmGenre makeFilmGenre(ResultSet rs) throws SQLException {
-        return FilmGenre.valueOf(rs.getString("name"));
+    public void update(Film film) {
+        for (FilmGenre genre : film.getGenres()) {
+            FilmGenre filmGenre = genreDao.getGenreById(genre.getId());
+            if (filmGenre == null) {
+                genreDao.create(genre);
+            }
+        }
+    }
+
+    @Override
+    public Set<FilmGenre> getAllGenresByFilmId(int id) {
+        return genreDao.getAllGenresByFilmId(id);
     }
 }
