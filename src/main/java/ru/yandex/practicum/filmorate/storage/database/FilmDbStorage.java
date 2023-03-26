@@ -74,6 +74,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpaRating(),
                 mpaDao.getMpaId(film.getMpaRating()),
                 film.getId());
+        filmGenreDao.update(film);
         return film;
     }
 

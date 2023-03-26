@@ -23,4 +23,16 @@ public class FilmLikeDaoImpl implements FilmLikeDao {
 
         return new HashSet<>(usersId);
     }
+
+    public void addLike(Integer filmId, Integer userId) {
+        String sql = "INSERT INTO film_like(film_id,user_id) VALUES(?,?)";
+        jdbcTemplate.update(sql, filmId, userId);
+    }
+
+    @Override
+    public void deleteLike(Integer filmId, Integer userId) {
+        String sql = "DELETE FROM film_like WHERE film_id=? AND user_id=?";
+        jdbcTemplate.update(sql, filmId, userId);
+    }
+
 }

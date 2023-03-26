@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.GenreDao;
+import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 
 import java.sql.ResultSet;
@@ -32,7 +33,16 @@ public class GenreDaoImpl implements GenreDao {
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilmGenre(rs), id);
         } catch (EmptyResultDataAccessException ex) {
-            return null;
+            throw new GenreNotFoundException(String.format("Жанр с id: %s не обнаружен", id));
+        }
+    }
+    @Override
+    public int getGenreId(String name) {
+        String sql = "SELECT genre_id FROM genre WHERE name=?";
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> rs.getInt("genre_id"), name);
+        } catch (EmptyResultDataAccessException ex) {
+            return -1;
         }
     }
     @Override
@@ -43,26 +53,14 @@ public class GenreDaoImpl implements GenreDao {
     }
     private FilmGenre makeFilmGenre(ResultSet rs) throws SQLException {
         FilmGenre genre = new FilmGenre();
-        genre.setId(rs.getInt("genre_id"));
         genre.setName(rs.getString("name"));
         return genre;
     }
 
     @Override
-    public FilmGenre create(FilmGenre genre) {
+    public int create(FilmGenre genre) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("genre")
                 .usingGeneratedKeyColumns("genre_id");
-        int id = jdbcInsert.executeAndReturnKey(Map.of("name", genre.getName())).intValue();
-        genre.setId(id);
-        return genre;
-    }
-
-
-    @Override
-    public FilmGenre update(FilmGenre genre) {
-        getGenreById(genre.getId());
-        String sql = "UPDATE genre SET name=? WHERE id=?";
-        jdbcTemplate.update(sql, genre.getName(), genre.getId());
-        return genre;
+        return jdbcInsert.executeAndReturnKey(Map.of("name", genre.getName())).intValue();
     }
 }

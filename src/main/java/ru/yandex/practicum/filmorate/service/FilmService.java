@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmLikeDao;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private FilmLikeDao filmLikeDao;
 
     public Collection<Film> getFilms() {
         return filmStorage.getFilms();
@@ -39,13 +42,20 @@ public class FilmService {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
         film.getUsersLiked().add(user.getId());
+        filmLikeDao.addLike(filmId, userId);
         log.info("Пользователь {} поставил фильму {} лайк", user.getLogin(), film.getName());
+    }
+
+    @Autowired
+    public void setFilmLikeDao(FilmLikeDao filmLikeDao) {
+        this.filmLikeDao = filmLikeDao;
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
         film.getUsersLiked().remove(user.getId());
+        filmLikeDao.deleteLike(filmId, userId);
         log.info("Пользователь {} убрал лайк с фильма {}", user.getLogin(), film.getName());
     }
 

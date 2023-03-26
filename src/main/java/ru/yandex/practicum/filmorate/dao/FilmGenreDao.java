@@ -8,4 +8,5 @@ import java.util.Set;
 public interface FilmGenreDao {
     void create(Film film);
     Set<FilmGenre> getAllGenresByFilmId(int id);
+    void update(Film film);
 }
