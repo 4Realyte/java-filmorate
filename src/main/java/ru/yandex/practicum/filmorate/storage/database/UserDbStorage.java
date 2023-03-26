@@ -37,7 +37,8 @@ public class UserDbStorage implements UserStorage {
                 .login(rs.getString("login"))
                 .name(rs.getString("name"))
                 .birthday(rs.getDate("birthday").toLocalDate())
-                .friends(userFriendsDao.getFriends(rs.getInt("id"), true))
+                .friends(userFriendsDao.getFriends(rs.getInt("id")))
+                .id(rs.getInt("id"))
                 .build();
         return user;
     }
@@ -56,6 +57,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User user) {
+        getUserById(user.getId());
         String sql = "UPDATE user SET email=?,login=?,name=?,birthday=? WHERE id=?";
         jdbcTemplate.update(sql,user.getEmail(),user.getLogin(),user.getName(),user.getBirthday(),user.getId());
         return user;

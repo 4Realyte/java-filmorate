@@ -15,10 +15,36 @@ public class UserFriendsDaoImpl implements UserFriendsDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Set<Integer> getFriends(int userId, boolean mutual) {
-        String sql = "SELECT friend_id FROM friends WHERE user_id=? AND status=?";
+    public Set<Integer> getFriends(int userId) {
+        String sql = "SELECT friend_id FROM friends WHERE user_id=?";
         List<Integer> friendsId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("friend_id"),
-                userId, true);
+                userId);
         return new HashSet<>(friendsId);
+    }
+
+    private boolean checkFriendStatus(int userId, int friendId) {
+        return getFriends(userId).contains(friendId) && getFriends(friendId).contains(userId);
+    }
+
+    public void updateFriendStatus(int userId, int friendId, boolean mutual) {
+        String sql = "UPDATE friends SET status=? WHERE user_id=? AND friend_id=?";
+        jdbcTemplate.update(sql, mutual, userId, friendId);
+        jdbcTemplate.update(sql, mutual, friendId, userId);
+    }
+
+    public void addFriend(int userId, int friendId) {
+        String sql = "INSERT INTO friends(user_id,friend_id,status) VALUES(?,?,?)";
+        jdbcTemplate.update(sql, userId, friendId, false);
+        if (checkFriendStatus(userId, friendId)) {
+            updateFriendStatus(userId, friendId, true);
+        }
+    }
+
+    public void deleteFriend(int userId, int friendId) {
+        String sql = "DELETE FROM friends WHERE user_id=? AND friend_id=?";
+        jdbcTemplate.update(sql, userId, friendId);
+        if (getFriends(friendId).contains(userId)) {
+            updateFriendStatus(friendId, userId, false);
+        }
     }
 }

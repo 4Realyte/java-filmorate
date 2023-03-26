@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user
     login    varchar NOT NULL,
     name     varchar,
     birthday date,
-    CONSTRAINT not_empty_email CHECK (email <> '' AND name <> ''),
+    CONSTRAINT not_empty_email CHECK (email <> '' AND login <> ''),
     CONSTRAINT date_constr CHECK (birthday < CURRENT_DATE)
 );
 CREATE TABLE IF NOT EXISTS mpa_rating

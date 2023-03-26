@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.model.MPA;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -26,6 +28,13 @@ public class MpaDaoImpl implements MpaDao {
         String sql = "SELECT rating_id FROM mpa_rating WHERE name=?";
         int id = jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> rs.getInt("rating_id")), mpa.name());
         return id;
+    }
+
+    @Override
+    public Collection<MPA> getAllMpa() {
+        String sql = "SELECT * FROM mpa_rating";
+        List<MPA> mpas = jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
+        return mpas;
     }
 
     private MPA makeMpa(ResultSet rs) throws SQLException {

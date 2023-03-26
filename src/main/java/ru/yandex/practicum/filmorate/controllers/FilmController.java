@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.controllers;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -29,6 +31,27 @@ public class FilmController {
                             @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
         return filmService.getFilmById(id);
 
+    }
+
+    @GetMapping("/genres")
+    public Collection<FilmGenre> getFilmGenres() {
+        return filmService.getGenres();
+    }
+
+    @GetMapping("/genres/{id}")
+    public FilmGenre getFilmGenreById(@PathVariable
+                                      @PositiveOrZero int id) {
+        return filmService.getGenreById(id);
+    }
+
+    @GetMapping("/mpa")
+    public Collection<MPA> getMpas() {
+        return filmService.getAllMpa();
+    }
+
+    @GetMapping("/mpa/{id}")
+    public MPA getMpaById(@PathVariable int id) {
+        return filmService.getMpaById(id);
     }
 
     @PostMapping
