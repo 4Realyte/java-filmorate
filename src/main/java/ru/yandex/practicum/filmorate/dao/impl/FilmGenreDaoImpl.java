@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
 import ru.yandex.practicum.filmorate.dao.GenreDao;
-import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 
@@ -20,32 +19,19 @@ public class FilmGenreDaoImpl implements FilmGenreDao {
     @Override
     public void create(Film film) {
         if (!film.getGenres().isEmpty()) {
-            String sql = "INSERT INTO film_genre(film_id,genre_id) VALUES(?,?) ON CONFLICT DO NOTHING";
+            film.getGenres().stream().map(FilmGenre::getId).forEach(genreDao::getGenreById);
+            String sql = "INSERT INTO film_genre(film_id,genre_id) VALUES(?,?)";
             for (FilmGenre genre : film.getGenres()) {
-                jdbcTemplate.update(sql, film.getId(), genreDao.getGenreId(genre.getName()));
+                jdbcTemplate.update(sql, film.getId(), genre.getId());
             }
+            film.setGenres(genreDao.getAllGenresByFilmId(film.getId()));
         }
     }
 
     @Override
     public void update(Film film) {
-        if (checkIfGenreExists(film)) {
-            delete(film);
-            create(film);
-        } else {
-            throw new GenreNotFoundException("При обновлении жанра фильма произошла ошибка");
-        }
-    }
-
-    private boolean checkIfGenreExists(Film film) {
-        boolean isExist = true;
-        for (FilmGenre genre : film.getGenres()) {
-            int id = genreDao.getGenreId(genre.getName());
-            if (id == -1) {
-                isExist = false;
-            }
-        }
-        return isExist;
+        delete(film);
+        create(film);
     }
 
     public void delete(Film film) {

@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,7 +65,7 @@ public class UserService {
                 .getFriends()
                 .stream()
                 .map(userStorage::getUserById)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     public Collection<User> findCommonFriends(Integer userId, Integer friendId) {

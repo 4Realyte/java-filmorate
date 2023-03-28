@@ -12,7 +12,7 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("/films")
+@RequestMapping
 @Validated
 public class FilmController {
     private final FilmService filmService;
@@ -21,12 +21,12 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping
+    @GetMapping("/films")
     public Collection<Film> getFilms() {
         return filmService.getFilms();
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/films/{id}")
     public Film getFilmById(@PathVariable
                             @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
         return filmService.getFilmById(id);
@@ -54,17 +54,17 @@ public class FilmController {
         return filmService.getMpaById(id);
     }
 
-    @PostMapping
+    @PostMapping("/films")
     public Film create(@Valid @RequestBody Film film) {
         return filmService.createFilm(film);
     }
 
-    @PutMapping
+    @PutMapping("/films")
     public Film update(@Valid @RequestBody Film film) {
         return filmService.updateFilm(film);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/films/{id}/like/{userId}")
     public void addLike(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
                         Integer filmId,
                         @PathVariable
@@ -72,7 +72,7 @@ public class FilmController {
         filmService.addLike(filmId, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping("/films/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") @PositiveOrZero(message = "Параметр id не может быть отрицательным")
                            Integer filmId,
                            @PathVariable
@@ -80,7 +80,7 @@ public class FilmController {
         filmService.deleteLike(filmId, userId);
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/films/popular")
     public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10")
                                             @PositiveOrZero(message = "Параметр count не может быть отрицательным")
                                             Integer count) {

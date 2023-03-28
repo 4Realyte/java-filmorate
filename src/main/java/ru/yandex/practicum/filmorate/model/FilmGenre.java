@@ -8,4 +8,5 @@ import javax.validation.constraints.NotBlank;
 public class FilmGenre {
     @NotBlank
     private String name;
+    private int id;
 }

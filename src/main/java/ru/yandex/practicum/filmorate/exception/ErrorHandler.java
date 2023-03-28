@@ -30,7 +30,8 @@ public class ErrorHandler {
         return Map.of("Ошибка валидации", ex.getFieldError().getDefaultMessage());
     }
 
-    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class,
+            MpaNotFoundException.class, GenreNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundEx(final RuntimeException ex) {
         log.warn("Ошибка запроса: {}", ex.getMessage());

@@ -54,8 +54,7 @@ public class FilmService {
     public void addLike(Integer filmId, Integer userId) {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
-        film.getUsersLiked().add(user.getId());
-        filmLikeDao.addLike(filmId, userId);
+        filmLikeDao.addLike(film.getId(), user.getId());
         log.info("Пользователь {} поставил фильму {} лайк", user.getLogin(), film.getName());
     }
 
@@ -93,8 +92,7 @@ public class FilmService {
     public void deleteLike(Integer filmId, Integer userId) {
         Film film = filmStorage.getFilmById(filmId);
         User user = userStorage.getUserById(userId);
-        film.getUsersLiked().remove(user.getId());
-        filmLikeDao.deleteLike(filmId, userId);
+        filmLikeDao.deleteLike(film.getId(), user.getId());
         log.info("Пользователь {} убрал лайк с фильма {}", user.getLogin(), film.getName());
     }
 

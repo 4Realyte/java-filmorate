@@ -9,5 +9,4 @@ public interface GenreDao {
     int create(FilmGenre genre);
     FilmGenre getGenreById(int id);
     Set<FilmGenre> getAllGenresByFilmId(int id);
-    int getGenreId(String name);
 }

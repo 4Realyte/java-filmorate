@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.database;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,6 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaDao mpaDao;
     private final FilmGenreDao filmGenreDao;
     private final FilmLikeDao filmLikeDao;
+    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
     public Collection<Film> getFilms() {
@@ -42,7 +45,7 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
-                .mpaRating(mpaDao.getMpaById(rs.getInt("rating_id")))
+                .mpa(mpaDao.getMpaById(rs.getInt("rating_id")))
                 .genres(filmGenreDao.getAllGenresByFilmId(rs.getInt("id")))
                 .usersLiked(filmLikeDao.findUsersIdLiked(rs.getInt("id")))
                 .build();
@@ -50,6 +53,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    @SneakyThrows
     public Film create(Film film) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("film")
                 .usingGeneratedKeyColumns("id");
@@ -57,13 +61,15 @@ public class FilmDbStorage implements FilmStorage {
                 "description", film.getDescription(),
                 "release_date", film.getReleaseDate(),
                 "duration", film.getDuration(),
-                "rating_id", mpaDao.getMpaId(film.getMpaRating()))).intValue();
+                "rating_id", mpaDao.getMpaId(film.getMpa()))).intValue();
         film.setId(id);
         filmGenreDao.create(film);
+        log.info("Создан фильм : {}", mapper.writeValueAsString(film));
         return film;
     }
 
     @Override
+    @SneakyThrows
     public Film update(Film film) {
         getFilmById(film.getId());
         String sql = "UPDATE film SET name=?, description=?, release_date=?,duration=?, rating_id=? WHERE id=?";
@@ -71,10 +77,10 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpaRating(),
-                mpaDao.getMpaId(film.getMpaRating()),
+                mpaDao.getMpaId(film.getMpa()),
                 film.getId());
         filmGenreDao.update(film);
+        log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
         return film;
     }
 

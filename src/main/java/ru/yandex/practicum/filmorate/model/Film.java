@@ -11,6 +11,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Data
@@ -21,7 +22,7 @@ public class Film {
     private Set<Integer> usersLiked = new HashSet<>();
     private int id;
     @Builder.Default
-    private Set<FilmGenre> genres = new HashSet<>();
+    private Set<FilmGenre> genres = new LinkedHashSet<>();
     @NotBlank(message = "Имя не может быть пустым")
     private String name;
     @NotBlank
@@ -32,5 +33,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной или равной нулю")
     private long duration;
-    private MPA mpaRating;
+    private MPA mpa;
 }

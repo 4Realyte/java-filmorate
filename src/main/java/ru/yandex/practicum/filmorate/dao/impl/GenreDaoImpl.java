@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.FilmGenre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,9 +23,9 @@ public class GenreDaoImpl implements GenreDao {
 
     @Override
     public Set<FilmGenre> getAllGenres() {
-        String sql = "SELECT name FROM genre";
+        String sql = "SELECT * FROM genre";
         List<FilmGenre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmGenre(rs));
-        return new HashSet<>(genres);
+        return new LinkedHashSet<>(genres);
     }
     @Override
     public FilmGenre getGenreById(int id) {
@@ -37,23 +37,16 @@ public class GenreDaoImpl implements GenreDao {
         }
     }
     @Override
-    public int getGenreId(String name) {
-        String sql = "SELECT genre_id FROM genre WHERE name=?";
-        try {
-            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> rs.getInt("genre_id"), name);
-        } catch (EmptyResultDataAccessException ex) {
-            return -1;
-        }
-    }
-    @Override
     public Set<FilmGenre> getAllGenresByFilmId(int id) {
-        String sql = "SELECT name FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?)";
+        String sql = "SELECT * FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?) " +
+                "ORDER BY genre_id";
         List<FilmGenre> filmGenres = jdbcTemplate.query(sql, ((rs, rowNum) -> makeFilmGenre(rs)), id);
-        return new HashSet<>(filmGenres);
+        return new LinkedHashSet<>(filmGenres);
     }
     private FilmGenre makeFilmGenre(ResultSet rs) throws SQLException {
         FilmGenre genre = new FilmGenre();
         genre.setName(rs.getString("name"));
+        genre.setId(rs.getInt("genre_id"));
         return genre;
     }
 

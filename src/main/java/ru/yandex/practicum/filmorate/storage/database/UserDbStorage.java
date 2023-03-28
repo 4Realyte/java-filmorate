@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.database;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserFriendsDao userFriendsDao;
+    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
     @Override
     public Collection<User> getUsers() {
@@ -44,7 +47,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    @SneakyThrows
     public User create(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("user")
                 .usingGeneratedKeyColumns("id");
         int id = jdbcInsert.executeAndReturnKey(Map.of("email", user.getEmail(),
@@ -52,14 +59,17 @@ public class UserDbStorage implements UserStorage {
                 "name", user.getName(),
                 "birthday", user.getBirthday())).intValue();
         user.setId(id);
+        log.info("Добавлен пользователь : {}", mapper.writeValueAsString(user));
         return user;
     }
 
     @Override
+    @SneakyThrows
     public User update(User user) {
         getUserById(user.getId());
         String sql = "UPDATE user SET email=?,login=?,name=?,birthday=? WHERE id=?";
         jdbcTemplate.update(sql,user.getEmail(),user.getLogin(),user.getName(),user.getBirthday(),user.getId());
+        log.info("Обновлен пользователь : {}", mapper.writeValueAsString(user));
         return user;
     }
 
