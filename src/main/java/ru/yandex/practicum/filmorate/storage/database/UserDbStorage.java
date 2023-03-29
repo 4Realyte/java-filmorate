@@ -8,10 +8,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.UserFriendsDao;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.UserFriendsDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,21 +46,36 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
+    private User checkIfExists(User user) {
+        String sql = "SELECT * FROM user WHERE email=? AND login=? AND name=? AND birthday=?";
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeUser(rs), user.getEmail(),
+                    user.getLogin(), user.getName(), user.getBirthday());
+        } catch (EmptyResultDataAccessException ex) {
+            return null;
+        }
+    }
+
     @Override
     @SneakyThrows
     public User create(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        User dbUser;
+        if ((dbUser = checkIfExists(user)) != null) {
+            return dbUser;
+        } else {
+            if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
+            }
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("user")
+                    .usingGeneratedKeyColumns("id");
+            int id = jdbcInsert.executeAndReturnKey(Map.of("email", user.getEmail(),
+                    "login", user.getLogin(),
+                    "name", user.getName(),
+                    "birthday", user.getBirthday())).intValue();
+            user.setId(id);
+            log.info("Добавлен пользователь : {}", mapper.writeValueAsString(user));
+            return user;
         }
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("user")
-                .usingGeneratedKeyColumns("id");
-        int id = jdbcInsert.executeAndReturnKey(Map.of("email", user.getEmail(),
-                "login", user.getLogin(),
-                "name", user.getName(),
-                "birthday", user.getBirthday())).intValue();
-        user.setId(id);
-        log.info("Добавлен пользователь : {}", mapper.writeValueAsString(user));
-        return user;
     }
 
     @Override
@@ -68,7 +83,7 @@ public class UserDbStorage implements UserStorage {
     public User update(User user) {
         getUserById(user.getId());
         String sql = "UPDATE user SET email=?,login=?,name=?,birthday=? WHERE id=?";
-        jdbcTemplate.update(sql,user.getEmail(),user.getLogin(),user.getName(),user.getBirthday(),user.getId());
+        jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         log.info("Обновлен пользователь : {}", mapper.writeValueAsString(user));
         return user;
     }

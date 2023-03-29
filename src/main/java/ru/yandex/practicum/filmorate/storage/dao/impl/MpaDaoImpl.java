@@ -1,12 +1,12 @@
-package ru.yandex.practicum.filmorate.dao.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,9 +21,9 @@ public class MpaDaoImpl implements MpaDao {
     @Override
     public MPA getMpaById(int id) {
         String sql = "SELECT name FROM mpa_rating WHERE rating_id=?";
-        try{
+        try {
             return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeMpa(rs)), id);
-        } catch (EmptyResultDataAccessException ex){
+        } catch (EmptyResultDataAccessException ex) {
             throw new MpaNotFoundException(String.format("MPA с id: %s не обнаружен", id));
         }
     }
@@ -31,8 +31,11 @@ public class MpaDaoImpl implements MpaDao {
     @Override
     public int getMpaId(MPA mpa) {
         String sql = "SELECT rating_id FROM mpa_rating WHERE name=?";
-        int id = jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> rs.getInt("rating_id")), mpa.getName());
-        return id;
+        try {
+            return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> rs.getInt("rating_id")), mpa.getName());
+        } catch (EmptyResultDataAccessException ex) {
+            return -1;
+        }
     }
 
     @Override
@@ -43,6 +46,6 @@ public class MpaDaoImpl implements MpaDao {
     }
 
     private MPA makeMpa(ResultSet rs) throws SQLException {
-        return MPA.valueOf(rs.getString("name").replaceFirst("-",""));
+        return MPA.valueOf(rs.getString("name").replaceFirst("-", ""));
     }
 }

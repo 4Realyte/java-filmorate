@@ -1,13 +1,13 @@
-package ru.yandex.practicum.filmorate.dao.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.storage.dao.GenreDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +27,7 @@ public class GenreDaoImpl implements GenreDao {
         List<FilmGenre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilmGenre(rs));
         return new LinkedHashSet<>(genres);
     }
+
     @Override
     public FilmGenre getGenreById(int id) {
         String sql = "SELECT * FROM genre WHERE genre_id=?";
@@ -36,6 +37,7 @@ public class GenreDaoImpl implements GenreDao {
             throw new GenreNotFoundException(String.format("Жанр с id: %s не обнаружен", id));
         }
     }
+
     @Override
     public Set<FilmGenre> getAllGenresByFilmId(int id) {
         String sql = "SELECT * FROM genre WHERE genre_id IN (SELECT genre_id FROM film_genre WHERE film_id=?) " +
@@ -43,10 +45,10 @@ public class GenreDaoImpl implements GenreDao {
         List<FilmGenre> filmGenres = jdbcTemplate.query(sql, ((rs, rowNum) -> makeFilmGenre(rs)), id);
         return new LinkedHashSet<>(filmGenres);
     }
+
     private FilmGenre makeFilmGenre(ResultSet rs) throws SQLException {
-        FilmGenre genre = new FilmGenre();
-        genre.setName(rs.getString("name"));
-        genre.setId(rs.getInt("genre_id"));
+        FilmGenre genre = new FilmGenre(rs.getString("name"),
+                rs.getInt("genre_id"));
         return genre;
     }
 

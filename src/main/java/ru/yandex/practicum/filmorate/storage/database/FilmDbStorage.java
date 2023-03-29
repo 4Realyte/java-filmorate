@@ -8,12 +8,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.FilmGenreDao;
-import ru.yandex.practicum.filmorate.dao.FilmLikeDao;
-import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FilmGenreDao;
+import ru.yandex.practicum.filmorate.storage.dao.FilmLikeDao;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,20 +52,40 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    private Film checkIfExists(Film film) {
+        String sql = "SELECT * FROM film WHERE name=? AND description=? AND release_date=? AND duration=? AND rating_id=?";
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs),
+                    film.getName(),
+                    film.getDescription(),
+                    film.getReleaseDate(),
+                    film.getDuration(),
+                    mpaDao.getMpaId(film.getMpa()));
+        } catch (EmptyResultDataAccessException ex) {
+            return null;
+        }
+
+    }
+
     @Override
     @SneakyThrows
     public Film create(Film film) {
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("film")
-                .usingGeneratedKeyColumns("id");
-        int id = jdbcInsert.executeAndReturnKey(Map.of("name", film.getName(),
-                "description", film.getDescription(),
-                "release_date", film.getReleaseDate(),
-                "duration", film.getDuration(),
-                "rating_id", mpaDao.getMpaId(film.getMpa()))).intValue();
-        film.setId(id);
-        filmGenreDao.create(film);
-        log.info("Создан фильм : {}", mapper.writeValueAsString(film));
-        return film;
+        Film dbFilm;
+        if ((dbFilm = checkIfExists(film)) != null) {
+            return dbFilm;
+        } else {
+            SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("film")
+                    .usingGeneratedKeyColumns("id");
+            int id = jdbcInsert.executeAndReturnKey(Map.of("name", film.getName(),
+                    "description", film.getDescription(),
+                    "release_date", film.getReleaseDate(),
+                    "duration", film.getDuration(),
+                    "rating_id", mpaDao.getMpaId(film.getMpa()))).intValue();
+            film.setId(id);
+            filmGenreDao.create(film);
+            log.info("Создан фильм : {}", mapper.writeValueAsString(film));
+            return film;
+        }
     }
 
     @Override

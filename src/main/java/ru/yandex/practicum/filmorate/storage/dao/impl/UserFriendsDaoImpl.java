@@ -1,9 +1,9 @@
-package ru.yandex.practicum.filmorate.dao.impl;
+package ru.yandex.practicum.filmorate.storage.dao.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.UserFriendsDao;
+import ru.yandex.practicum.filmorate.storage.dao.UserFriendsDao;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +26,7 @@ public class UserFriendsDaoImpl implements UserFriendsDao {
         return getFriends(userId).contains(friendId) && getFriends(friendId).contains(userId);
     }
 
-    public void updateFriendStatus(int userId, int friendId, boolean mutual) {
+    private void updateFriendStatus(int userId, int friendId, boolean mutual) {
         String sql = "UPDATE friends SET status=? WHERE user_id=? AND friend_id=?";
         jdbcTemplate.update(sql, mutual, userId, friendId);
         jdbcTemplate.update(sql, mutual, friendId, userId);

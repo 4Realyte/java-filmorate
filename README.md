@@ -1,5 +1,4 @@
 # java-filmorate
-Template repository for Filmorate project.
 ![ER-diagram](project.png)
 # Описание диаграммы
 * Для описания пользователей, поставивших лайк фильму, реализована таблица "film_like".

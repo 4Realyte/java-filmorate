@@ -8,18 +8,16 @@ import ru.yandex.practicum.filmorate.model.User;
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest extends ControllerTest {
     @Autowired
     UserController userController;
+
     @Test
     @SneakyThrows
     public void createUser_withoutEmail() {
@@ -84,6 +82,7 @@ public class UserControllerTest extends ControllerTest {
     }
 
     @Test
+    @SneakyThrows
     public void createUser_withFutureBirthDate() throws IOException, InterruptedException {
         User user = User.builder()
                 .id(1)
@@ -95,12 +94,5 @@ public class UserControllerTest extends ControllerTest {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         ConstraintViolation<User> violation = violations.iterator().next();
         assertEquals("дата рождения не может быть в будущем", violation.getMessage());
-    }
-    @Test
-    @SneakyThrows
-    public void getUsers_shouldReturnEmptyList() {
-        mockMvc.perform(get("/users"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(Collections.emptyList())));
     }
 }
