@@ -72,6 +72,7 @@ public class UserServiceTest extends ServiceTest {
                 .build());
         assertThrows(UserNotFoundException.class, () -> userService.getUserById(2));
     }
+
     @Test
     public void getUserById_shouldReturnPreviouslyAddedUser() {
         User user = userService.createUser(User.builder()
