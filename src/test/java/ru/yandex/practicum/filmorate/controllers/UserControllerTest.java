@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.ConstraintViolation;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureTestDatabase
 public class UserControllerTest extends ControllerTest {
     @Autowired
     UserController userController;
@@ -74,7 +76,7 @@ public class UserControllerTest extends ControllerTest {
         User user = User.builder()
                 .id(1)
                 .email("yandex@mail.com")
-                .login("Nick")
+                .login("Sam")
                 .birthday(LocalDate.of(1994, 10, 23))
                 .build();
         User createdUser = userController.create(user);
