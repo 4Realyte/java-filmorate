@@ -47,9 +47,7 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     private FilmGenre makeFilmGenre(ResultSet rs) throws SQLException {
-        FilmGenre genre = new FilmGenre(rs.getString("name"),
-                rs.getInt("genre_id"));
-        return genre;
+        return new FilmGenre(rs.getString("name"), rs.getInt("genre_id"));
     }
 
     @Override

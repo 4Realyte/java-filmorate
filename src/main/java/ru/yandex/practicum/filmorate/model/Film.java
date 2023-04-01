@@ -33,5 +33,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной или равной нулю")
     private long duration;
-    private MPA mpa;
+    private Mpa mpa;
 }

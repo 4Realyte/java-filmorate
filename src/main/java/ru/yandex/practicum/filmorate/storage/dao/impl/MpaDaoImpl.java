@@ -5,7 +5,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.sql.ResultSet;
@@ -19,8 +19,8 @@ public class MpaDaoImpl implements MpaDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public MPA getMpaById(int id) {
-        String sql = "SELECT name FROM mpa_rating WHERE rating_id=?";
+    public Mpa getMpaById(int id) {
+        String sql = "SELECT * FROM mpa_rating WHERE rating_id=?";
         try {
             return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeMpa(rs)), id);
         } catch (EmptyResultDataAccessException ex) {
@@ -29,23 +29,13 @@ public class MpaDaoImpl implements MpaDao {
     }
 
     @Override
-    public int getMpaId(MPA mpa) {
-        String sql = "SELECT rating_id FROM mpa_rating WHERE name=?";
-        try {
-            return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> rs.getInt("rating_id")), mpa.getName());
-        } catch (EmptyResultDataAccessException ex) {
-            return -1;
-        }
-    }
-
-    @Override
-    public Collection<MPA> getAllMpa() {
+    public Collection<Mpa> getAllMpa() {
         String sql = "SELECT * FROM mpa_rating";
-        List<MPA> mpas = jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
+        List<Mpa> mpas = jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
         return mpas;
     }
 
-    private MPA makeMpa(ResultSet rs) throws SQLException {
-        return MPA.valueOf(rs.getString("name").replaceFirst("-", ""));
+    private Mpa makeMpa(ResultSet rs) throws SQLException {
+        return new Mpa(rs.getString("mpa_name"), rs.getInt("rating_id"));
     }
 }

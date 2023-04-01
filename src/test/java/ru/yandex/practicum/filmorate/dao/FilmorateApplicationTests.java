@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.FilmLikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
@@ -49,7 +49,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(1987, 11, 12))
                 .duration(200)
                 .usersLiked(Collections.emptySet())
-                .mpa(MPA.PG)
+                .mpa(new Mpa("PG", 2))
                 .genres(Set.of(new FilmGenre("Комедия", 1)))
                 .build();
         user = User.builder()
@@ -125,12 +125,7 @@ class FilmorateApplicationTests {
     @Test
     public void getMpaByIdTest() {
         assertThrows(MpaNotFoundException.class, () -> mpaDao.getMpaById(9999));
-        assertThat(mpaDao.getMpaById(1)).isEqualTo(MPA.G);
-    }
-
-    @Test
-    public void getMpaIdTest() {
-        assertThat(mpaDao.getMpaId(MPA.PG)).isEqualTo(2);
+        assertThat(mpaDao.getMpaById(1).getName()).isEqualTo("G");
     }
 
     @Test
@@ -203,7 +198,7 @@ class FilmorateApplicationTests {
     @Test
     public void updateFilmTest() {
         Film created = filmStorage.create(film);
-        created.setMpa(MPA.NC17);
+        created.setMpa(new Mpa("NC-17", 5));
         created.setName("Great");
         created.setDuration(100);
         created.setGenres(Set.of(new FilmGenre("Драма", 2)));

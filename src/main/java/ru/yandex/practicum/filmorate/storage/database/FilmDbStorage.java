@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FilmGenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.FilmLikeDao;
@@ -33,34 +34,61 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getFilms() {
-        String sql = "SELECT * FROM film";
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_id, m.mpa_name " +
+                "FROM film AS f INNER JOIN mpa_rating as m ON f.rating_id=m.rating_id";
         List<Film> films = jdbcTemplate.query(sql, ((rs, rowNum) -> makeFilm(rs)));
         return films;
     }
 
-    private Film makeFilm(ResultSet rs) throws SQLException {
-        Film film = Film.builder()
-                .id(rs.getInt("id"))
+    public Collection<Film> getPopularFilms(int count) {
+        String sql = "SELECT * FROM film as f " +
+                "LEFT JOIN FILM_LIKE FL on f.ID = FL.FILM_ID " +
+                "GROUP BY ID " +
+                "ORDER BY COUNT(FILM_ID) DESC " +
+                "LIMIT ?";
+        List<Film> films = jdbcTemplate.query(sql, ((rs, rowNum) -> makePopularFilm(rs)), count);
+        return films;
+    }
+
+    // Отличие еще и в том, что здесь MPA получается через get метод, иначе пришлось бы делать еще один inner JOIN
+    private Film makePopularFilm(ResultSet rs) throws SQLException {
+        int filmId = rs.getInt("id");
+        return Film.builder()
+                .id(filmId)
                 .name(rs.getString("name"))
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .mpa(mpaDao.getMpaById(rs.getInt("rating_id")))
-                .genres(filmGenreDao.getAllGenresByFilmId(rs.getInt("id")))
-                .usersLiked(filmLikeDao.findUsersIdLiked(rs.getInt("id")))
+                .genres(filmGenreDao.getAllGenresByFilmId(filmId))
+                .usersLiked(filmLikeDao.findUsersIdLiked(filmId))
                 .build();
-        return film;
+    }
+
+    private Film makeFilm(ResultSet rs) throws SQLException {
+        int filmId = rs.getInt("id");
+        return Film.builder()
+                .id(filmId)
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(rs.getDate("release_date").toLocalDate())
+                .duration(rs.getInt("duration"))
+                .mpa(new Mpa(rs.getString("mpa_name"), rs.getInt("rating_id")))
+                .genres(filmGenreDao.getAllGenresByFilmId(filmId))
+                .build();
     }
 
     private Film checkIfExists(Film film) {
-        String sql = "SELECT * FROM film WHERE name=? AND description=? AND release_date=? AND duration=? AND rating_id=?";
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_id, m.mpa_name FROM film AS f " +
+                "INNER JOIN mpa_rating AS m ON f.rating_id=m.rating_id " +
+                "WHERE name=? AND description=? AND release_date=? AND duration=? AND f.rating_id=?";
         try {
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs),
                     film.getName(),
                     film.getDescription(),
                     film.getReleaseDate(),
                     film.getDuration(),
-                    mpaDao.getMpaId(film.getMpa()));
+                    film.getMpa().getId());
         } catch (EmptyResultDataAccessException ex) {
             return null;
         }
@@ -80,7 +108,7 @@ public class FilmDbStorage implements FilmStorage {
                     "description", film.getDescription(),
                     "release_date", film.getReleaseDate(),
                     "duration", film.getDuration(),
-                    "rating_id", mpaDao.getMpaId(film.getMpa()))).intValue();
+                    "rating_id", film.getMpa().getId())).intValue();
             film.setId(id);
             filmGenreDao.create(film);
             log.info("Создан фильм : {}", mapper.writeValueAsString(film));
@@ -97,7 +125,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                mpaDao.getMpaId(film.getMpa()),
+                film.getMpa().getId(),
                 film.getId());
         filmGenreDao.update(film);
         log.info("Обновлен фильм : {}", mapper.writeValueAsString(film));
@@ -106,7 +134,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Integer id) {
-        String sql = "SELECT * FROM film WHERE id=?";
+        String sql = "SELECT * FROM film AS f INNER JOIN mpa_rating as m ON f.rating_id=m.rating_id WHERE id=?";
         try {
             return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeFilm(rs)), id);
         } catch (EmptyResultDataAccessException ex) {
