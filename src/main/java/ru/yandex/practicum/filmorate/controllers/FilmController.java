@@ -10,8 +10,8 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("/films")
 @Validated
+@RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
 
@@ -28,7 +28,6 @@ public class FilmController {
     public Film getFilmById(@PathVariable
                             @PositiveOrZero(message = "Параметр id не может быть отрицательным") Integer id) {
         return filmService.getFilmById(id);
-
     }
 
     @PostMapping

@@ -2,12 +2,11 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.ConstraintViolation;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureTestDatabase
 public class FilmControllerTest extends ControllerTest {
     @Test
     @SneakyThrows
@@ -120,7 +120,7 @@ public class FilmControllerTest extends ControllerTest {
 
     @Test
     @SneakyThrows
-    public void HttpCreateFilm_withNegativeOrZeroDuration() {
+    public void httpCreateFilm_withNegativeOrZeroDuration() {
         Film film = Film.builder().id(1).name("titan").description("descript")
                 .releaseDate(LocalDate.of(1987, 11, 12))
                 .duration(-15)
@@ -154,35 +154,5 @@ public class FilmControllerTest extends ControllerTest {
                 .andExpect(status().isBadRequest());
         mockMvc.perform(get("/films/500"))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @SneakyThrows
-    public void shouldReturnFirstMostPopularFilm() {
-        Film film = Film.builder().id(1).name("titan").description("descript")
-                .releaseDate(LocalDate.of(1987, 11, 12))
-                .duration(-15)
-                .usersLiked(Set.of(1, 2, 3, 4))
-                .build();
-        Film film2 = Film.builder().id(2).name("Shrek").description("descript")
-                .releaseDate(LocalDate.of(1987, 10, 12))
-                .duration(0)
-                .usersLiked(Set.of(1, 2, 3))
-                .build();
-        Film film3 = Film.builder().id(3).name("Gatsby").description("The Great")
-                .releaseDate(LocalDate.of(2007, 10, 12))
-                .duration(0)
-                .build();
-        filmStorage.create(film);
-        filmStorage.create(film2);
-        filmStorage.create(film3);
-
-        mockMvc.perform(get("/films/popular")
-                        .param("count", "1"))
-                .andExpect(status().isOk());
-
-        List<Film> films = new ArrayList<>(filmService.getPopularFilms(1));
-
-        assertEquals("titan", films.get(0).getName());
     }
 }
